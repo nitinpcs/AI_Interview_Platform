@@ -33,21 +33,21 @@ public class JwtFilter extends OncePerRequestFilter {
         String email = null;
 
         try {
-            // 🔹 Extract token
+            
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
                 email = jwtUtil.extractEmail(token);
             }
 
-            // 🔹 Validate token
+            
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 if (!jwtUtil.isTokenExpired(token)) {
 
-                    // 🔥 Extract role from token
+                   
                     String role = jwtUtil.extractRole(token);
 
-                    // 🔥 Convert role to Spring Security authority
+
                     SimpleGrantedAuthority authority =
                             new SimpleGrantedAuthority("ROLE_" + role);
 
