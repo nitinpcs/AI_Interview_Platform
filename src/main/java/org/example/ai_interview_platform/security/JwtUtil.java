@@ -15,7 +15,7 @@ public class JwtUtil {
 
     private final String SECRET_KEY = "your-very-secret-key-your-very-secret-key";
 
-    // 🔹 Generate Access Token (WITH ROLE)
+    //  Generate Access Token (WITH ROLE)
     public String generateAccessToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
@@ -26,7 +26,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 🔹 Generate Refresh Token
+    //  Generate Refresh Token
     public String generateRefreshToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -36,22 +36,22 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 🔹 Extract Email
+    //  Extract Email
     public String extractEmail(String token) {
         return extractAllClaims(token).getSubject();
     }
 
-    // 🔹 Extract Role
+    //  Extract Role
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    // 🔹 Check Expiry
+    //  Check Expiry
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
     }
 
-    // 🔹 Core Method (THIS WAS MISSING)
+    //  Core Method (THIS WAS MISSING)
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -60,7 +60,7 @@ public class JwtUtil {
                 .getBody();
     }
 
-    // 🔹 Signing Key
+    //  Signing Key
     private Key getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
