@@ -27,8 +27,13 @@ public class InterviewModel {
 
     private LocalDateTime startedAt;
     private LocalDateTime completedAt;
+    private LocalDateTime expiresAt;
 
     private double averageScore;
     private String finalFeedback;
+
+    private List<String> strongAreas;
     private List<String> weakAreas;
+
+    private List<String> suggestions;
 }

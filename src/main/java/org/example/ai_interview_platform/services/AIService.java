@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -16,70 +17,86 @@ public class AIService {
     @Value("${ai.api.key}")
     private String apiKey;
 
-    // 🔹 Evaluate Answer
-    public Map<String, Object> evaluateAnswer(String question, String answer) {
-
-        String prompt = """
-                You are an interviewer.
-
-                Question: %s
-                Answer: %s
-
-                Give response strictly in format:
-                Score: X/10
-                Feedback: ...
-                """.formatted(question, answer);
-
-        String response = callOpenAI(prompt);
-
-        int score = extractScore(response);
-
-        return Map.of(
-                "feedback", response,
-                "score", score
-        );
-    }
-
     // 🔹 Generate Question
     public String generateQuestion(String skill) {
         String prompt = "Generate one technical interview question on " + skill;
         return callOpenAI(prompt);
     }
 
-    // 🔹 Final Summary
-    public String generateFinalSummary(String data) {
-        String prompt = "Summarize interview performance:\n" + data;
+    // 🔹 Generate Hint
+    public String generateHint(String question, String answer) {
+
+        String prompt = """
+                Give a very short hint (1 line) to improve this answer.
+
+                Question: %s
+                Answer: %s
+                """.formatted(question, answer);
+
         return callOpenAI(prompt);
     }
 
-    // 🔹 OpenAI Call
+    // 🔹 Final Report
+    public String generateFinalReport(String transcript) {
+
+        String prompt = """
+                You are an expert interviewer.
+
+                Evaluate this interview:
+
+                %s
+
+                Return STRICT JSON:
+                {
+                  "score": 7,
+                  "strengths": ["..."],
+                  "weaknesses": ["..."],
+                  "suggestions": ["..."]
+                }
+                """.formatted(transcript);
+
+        return callOpenAI(prompt);
+    }
+
+    // 🔹 CORE FIXED METHOD
     private String callOpenAI(String prompt) {
 
         WebClient client = webClientBuilder.baseUrl("https://api.openai.com/v1").build();
 
         Map<String, Object> request = Map.of(
                 "model", "gpt-4o-mini",
-                "messages", new Object[]{
+                "messages", List.of(
                         Map.of("role", "user", "content", prompt)
-                }
+                )
         );
 
-        return client.post()
+        Map<String, Object> response = client.post()
                 .uri("/chat/completions")
                 .header("Authorization", "Bearer " + apiKey)
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class)
+                .bodyToMono(Map.class)
                 .block();
+
+        return extractContent(response);
     }
 
-    // 🔹 Extract score
-    private int extractScore(String response) {
+    // 🔹 Extract only AI message content
+    private String extractContent(Map<String, Object> response) {
+
         try {
-            String line = response.split("\n")[0];
-            return Integer.parseInt(line.replaceAll("[^0-9]", ""));
+            List<Map<String, Object>> choices =
+                    (List<Map<String, Object>>) response.get("choices");
+
+            Map<String, Object> firstChoice = choices.get(0);
+
+            Map<String, Object> message =
+                    (Map<String, Object>) firstChoice.get("message");
+
+            return message.get("content").toString().trim();
+
         } catch (Exception e) {
-            return 5;
+            throw new RuntimeException("Error parsing OpenAI response: " + e.getMessage());
         }
     }
 }
