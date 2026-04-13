@@ -2,7 +2,6 @@ package org.example.ai_interview_platform.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.example.ai_interview_platform.models.InterviewModel;
-import org.example.ai_interview_platform.models.InterviewModel;
 import org.example.ai_interview_platform.services.InterviewService;
 import org.springframework.web.bind.annotation.*;
 

@@ -27,6 +27,7 @@ public class SecurityConfig {
 
                         // ADMIN only
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/resume/**").hasRole("USER")
 
                         // everything else
                         .anyRequest().authenticated()

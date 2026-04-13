@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Document(collection = "users")
 @Data
@@ -24,5 +25,7 @@ public class UserModel {
 
     private String resumeUrl;
 
+    private String resumeText;
+    private List<String> skills;
     private LocalDateTime createdAt;
 }
